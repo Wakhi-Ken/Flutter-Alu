@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../models/task.dart';
-import '../storage/task_storage.dart';
+import '../storage/storage.dart';
 
-/// Screen to add or edit a task.
-///
-/// Lets user specify title, description, due date/time, and optional reminder.
 class AddEditTaskScreen extends StatefulWidget {
   final Task? task;
   const AddEditTaskScreen({super.key, this.task});
@@ -14,6 +11,7 @@ class AddEditTaskScreen extends StatefulWidget {
   AddEditTaskScreenState createState() => AddEditTaskScreenState();
 }
 
+// State for AddEditTaskScreen
 class AddEditTaskScreenState extends State<AddEditTaskScreen> {
   final _formKey = GlobalKey<FormState>();
   late String _title;
@@ -22,11 +20,16 @@ class AddEditTaskScreenState extends State<AddEditTaskScreen> {
   TimeOfDay? _dueTime;
   bool _reminderEnabled = false;
   TimeOfDay? _reminderTime;
+  //
+  final Color _iconColor = const Color(0xFF0051FF); // Blue icons
+  final Color _textColor = Colors.white; // White text
 
   @override
+  // Initialize state
   void initState() {
     super.initState();
     final t = widget.task;
+    // If editing an existing task, populate fields
     if (t != null) {
       _title = t.title;
       _description = t.description;
@@ -37,6 +40,7 @@ class AddEditTaskScreenState extends State<AddEditTaskScreen> {
           ? TimeOfDay(hour: t.reminder!.hour, minute: t.reminder!.minute)
           : null;
     } else {
+      //
       _title = '';
       _description = '';
       final now = DateTime.now();
@@ -47,6 +51,7 @@ class AddEditTaskScreenState extends State<AddEditTaskScreen> {
     }
   }
 
+  /// Pick due date
   Future<void> _pickDueDate() async {
     final date = await showDatePicker(
       context: context,
@@ -61,6 +66,7 @@ class AddEditTaskScreenState extends State<AddEditTaskScreen> {
     }
   }
 
+  /// Pick due time
   Future<void> _pickDueTime() async {
     final time = await showTimePicker(
       context: context,
@@ -73,6 +79,7 @@ class AddEditTaskScreenState extends State<AddEditTaskScreen> {
     }
   }
 
+  /// Pick reminder time
   Future<void> _pickReminderTime() async {
     final time = await showTimePicker(
       context: context,
@@ -85,6 +92,7 @@ class AddEditTaskScreenState extends State<AddEditTaskScreen> {
     }
   }
 
+  /// Save task
   Future<void> _save() async {
     if (_formKey.currentState?.validate() ?? false) {
       final due = DateTime(
@@ -94,6 +102,8 @@ class AddEditTaskScreenState extends State<AddEditTaskScreen> {
         (_dueTime ?? TimeOfDay.now()).hour,
         (_dueTime ?? TimeOfDay.now()).minute,
       );
+
+      // If reminder is enabled, set reminder datetime
       final reminder = _reminderEnabled && _reminderTime != null
           ? DateTime(
               _dueDate!.year,
@@ -103,7 +113,7 @@ class AddEditTaskScreenState extends State<AddEditTaskScreen> {
               _reminderTime!.minute,
             )
           : null;
-
+      // Create or update task
       final task = Task(
         id: widget.task?.id ?? DateTime.now().millisecondsSinceEpoch,
         title: _title,
@@ -122,61 +132,100 @@ class AddEditTaskScreenState extends State<AddEditTaskScreen> {
     }
   }
 
+  // Build UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF1B1B1B), // Dark background
       appBar: AppBar(
-        title: Text(widget.task == null ? 'Add Task' : 'Edit Task'),
-        actions: [IconButton(icon: const Icon(Icons.save), onPressed: _save)],
+        title: Text(
+          widget.task == null ? 'Add Task' : 'Edit Task',
+          style: TextStyle(color: _textColor),
+        ),
+        backgroundColor: const Color.fromARGB(255, 2, 5, 175),
+        foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+        iconTheme: IconThemeData(
+          color: const Color.fromARGB(255, 255, 255, 255),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.save),
+            color: const Color.fromARGB(255, 255, 255, 255),
+            onPressed: _save,
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
-          child: Column(
+          child: ListView(
             children: [
               TextFormField(
-                decoration: InputDecoration(labelText: 'Title'),
+                style: TextStyle(color: _textColor),
+                decoration: InputDecoration(
+                  labelText: 'Title',
+                  labelStyle: TextStyle(color: _iconColor),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: _iconColor),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: _iconColor),
+                  ),
+                ),
                 initialValue: _title,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a title';
-                  }
-                  return null;
-                },
-                onChanged: (value) {
-                  setState(() {
-                    _title = value;
-                  });
-                },
+                validator: (value) => (value == null || value.isEmpty)
+                    ? 'Please enter a title'
+                    : null,
+                onChanged: (value) => setState(() => _title = value),
               ),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Description'),
+                style: TextStyle(color: _textColor),
+                decoration: InputDecoration(
+                  labelText: 'Description',
+                  labelStyle: TextStyle(color: _iconColor),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: _iconColor),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: _iconColor),
+                  ),
+                ),
                 initialValue: _description,
-                onChanged: (value) {
-                  setState(() {
-                    _description = value;
-                  });
-                },
+                onChanged: (value) => setState(() => _description = value),
               ),
               const SizedBox(height: 12),
               ListTile(
-                title: Text('Due Date: ${DateFormat.yMd().format(_dueDate!)}'),
-                subtitle: Text('Tap to change'),
-                trailing: const Icon(Icons.event),
+                title: Text(
+                  'Due Date: ${DateFormat.yMd().format(_dueDate!)}',
+                  style: TextStyle(color: _textColor),
+                ),
+                subtitle: Text(
+                  'Tap to change',
+                  style: TextStyle(color: Colors.white70),
+                ),
+                trailing: Icon(Icons.event, color: _iconColor),
                 onTap: _pickDueDate,
               ),
               ListTile(
                 title: Text(
                   'Due Time: ${(_dueTime ?? TimeOfDay.now()).format(context)}',
+                  style: TextStyle(color: _textColor),
                 ),
-                subtitle: const Text('Tap to change'),
-                trailing: const Icon(Icons.schedule),
+                subtitle: Text(
+                  'Tap to change',
+                  style: TextStyle(color: Colors.white70),
+                ),
+                trailing: Icon(Icons.schedule, color: _iconColor),
                 onTap: _pickDueTime,
               ),
               SwitchListTile(
-                title: const Text('Enable Reminder'),
+                title: Text(
+                  'Enable Reminder',
+                  style: TextStyle(color: _textColor),
+                ),
                 value: _reminderEnabled,
+                activeColor: _iconColor,
                 onChanged: (v) {
                   setState(() {
                     _reminderEnabled = v;
@@ -190,13 +239,27 @@ class AddEditTaskScreenState extends State<AddEditTaskScreen> {
                 ListTile(
                   title: Text(
                     'Reminder Time: ${(_reminderTime ?? (_dueTime ?? TimeOfDay.now())).format(context)}',
+                    style: TextStyle(color: _textColor),
                   ),
-                  subtitle: const Text('Tap to change'),
-                  trailing: const Icon(Icons.alarm),
+                  subtitle: Text(
+                    'Tap to change',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                  trailing: Icon(Icons.alarm, color: _iconColor),
                   onTap: _pickReminderTime,
                 ),
               const SizedBox(height: 16),
-              ElevatedButton(onPressed: _save, child: const Text('Save')),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _iconColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: _save,
+                child: const Text('Save'),
+              ),
             ],
           ),
         ),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'screens/today_screen.dart';
-import 'screens/calendar_screen.dart';
-import 'screens/settings_screen.dart';
-import 'services/reminder_service.dart';
+import 'screens/today.dart';
+import 'screens/calendar.dart';
+import 'screens/settings.dart';
+import 'services/reminders.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,6 +15,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Study Planner',
+      // Dark theme with custom colors
       theme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF121212),
@@ -42,18 +43,20 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// Home page with bottom navigation
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-
+  // State management for bottom navigation
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
+// State class for HomePage
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   final String _storageMethod = "SharedPreferences";
   late final List<Widget> _pages;
-
+  // Initialize pages and start reminder service
   @override
   void initState() {
     super.initState();
@@ -62,12 +65,13 @@ class _HomePageState extends State<HomePage> {
       const CalendarScreen(),
       SettingsScreen(storageMethod: _storageMethod),
     ];
-
+    // Start the reminder service after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ReminderService.start(context);
     });
   }
 
+  // Build method with IndexedStack for page management
   @override
   Widget build(BuildContext context) {
     return Scaffold(

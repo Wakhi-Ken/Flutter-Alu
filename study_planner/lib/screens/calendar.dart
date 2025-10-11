@@ -3,6 +3,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
+/// Screen showing calendar with tasks
 class CalendarScreen extends StatefulWidget {
   const CalendarScreen({super.key});
 
@@ -10,20 +11,22 @@ class CalendarScreen extends StatefulWidget {
   State<CalendarScreen> createState() => _CalendarScreenState();
 }
 
+/// State for CalendarScreen
 class _CalendarScreenState extends State<CalendarScreen>
     with SingleTickerProviderStateMixin {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   Map<String, List<Map<String, dynamic>>> _tasksByDate = {};
-
+  // Animation controller for fade effect
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
 
+  /// Initialize state
   @override
   void initState() {
     super.initState();
     _loadTasks();
-
+    // Initialize fade animation
     _fadeController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 1),
@@ -35,15 +38,18 @@ class _CalendarScreenState extends State<CalendarScreen>
     _fadeController.forward();
   }
 
+  /// Dispose resources
   @override
   void dispose() {
     _fadeController.dispose();
     super.dispose();
   }
 
+  /// Generate key in YYYY-MM-DD format
   String _makeKey(DateTime d) =>
       "${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}";
 
+  /// Load tasks from shared preferences
   Future<void> _loadTasks() async {
     final prefs = await SharedPreferences.getInstance();
     final data = prefs.getString('tasks_by_date_v1');
@@ -57,6 +63,7 @@ class _CalendarScreenState extends State<CalendarScreen>
     });
   }
 
+  /// Get tasks for a specific day
   List<Map<String, dynamic>> _getTasksForDay(DateTime day) {
     final key = _makeKey(day);
     return _tasksByDate[key] ?? [];
@@ -69,16 +76,20 @@ class _CalendarScreenState extends State<CalendarScreen>
     return Scaffold(
       appBar: AppBar(
         title: const Text("Calendar"),
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
+        backgroundColor: const Color.fromARGB(255, 2, 5, 175),
+        foregroundColor: const Color.fromARGB(255, 255, 255, 255),
         elevation: 0,
         actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadTasks),
+          IconButton(
+            icon: const Icon(Icons.calendar_today),
+            onPressed: _loadTasks,
+          ),
         ],
       ),
       body: FadeTransition(
         opacity: _fadeAnimation,
         child: Column(
+          // Calendar and task list
           children: [
             TableCalendar(
               firstDay: DateTime.utc(2020, 1, 1),
@@ -91,6 +102,8 @@ class _CalendarScreenState extends State<CalendarScreen>
                   _focusedDay = focused;
                 });
               },
+
+              /// Load tasks for the selected day
               eventLoader: _getTasksForDay,
               calendarStyle: CalendarStyle(
                 todayDecoration: BoxDecoration(
@@ -102,7 +115,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                   shape: BoxShape.circle,
                 ),
                 markerDecoration: const BoxDecoration(
-                  color: Colors.greenAccent,
+                  color: Color.fromARGB(255, 9, 255, 0),
                   shape: BoxShape.circle,
                 ),
                 outsideDaysVisible: false,
@@ -111,25 +124,29 @@ class _CalendarScreenState extends State<CalendarScreen>
                 formatButtonVisible: false,
                 titleCentered: true,
                 titleTextStyle: TextStyle(
-                  color: Colors.white,
+                  color: Color.fromARGB(255, 255, 255, 255),
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
+
+            /// Task list
             const SizedBox(height: 10),
             Expanded(
               child: _selectedDay == null
                   ? const Center(
                       child: Text(
                         "Select a date to view tasks",
-                        style: TextStyle(color: Colors.white70),
+                        style: TextStyle(
+                          color: Color.fromARGB(179, 17, 0, 255),
+                        ),
                       ),
                     )
                   : _getTasksForDay(_selectedDay!).isEmpty
                   ? const Center(
                       child: Text(
                         "No tasks for this date",
-                        style: TextStyle(color: Colors.white70),
+                        style: TextStyle(color: Color.fromARGB(179, 4, 0, 255)),
                       ),
                     )
                   : ListView.builder(
@@ -138,7 +155,12 @@ class _CalendarScreenState extends State<CalendarScreen>
                       itemBuilder: (context, i) {
                         final task = _getTasksForDay(_selectedDay!)[i];
                         return Card(
-                          color: Colors.grey[900]?.withOpacity(0.85),
+                          color: const Color.fromARGB(
+                            255,
+                            65,
+                            83,
+                            187,
+                          )?.withOpacity(0.85),
                           elevation: 2,
                           margin: const EdgeInsets.symmetric(
                             vertical: 6,
@@ -163,7 +185,7 @@ class _CalendarScreenState extends State<CalendarScreen>
                                 ? Text(
                                     task['description'],
                                     style: const TextStyle(
-                                      color: Colors.white70,
+                                      color: Color.fromARGB(255, 255, 255, 255),
                                     ),
                                   )
                                 : null,

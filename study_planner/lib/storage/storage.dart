@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/task.dart';
 
+/// Storage for tasks using SharedPreferences
 class TaskStorage {
   static const String _key = 'tasks_by_date_v1';
 
@@ -13,7 +14,7 @@ class TaskStorage {
     final prefs = await SharedPreferences.getInstance();
     final data = prefs.getString(_key);
     if (data == null) return {};
-
+    // Decode JSON
     final decoded = json.decode(data) as Map<String, dynamic>;
     return decoded.map(
       (key, value) => MapEntry(

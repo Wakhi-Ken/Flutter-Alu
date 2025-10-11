@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+/// Model class for Task
 class Task {
   final int id; // unique id
   String title;
@@ -8,6 +9,7 @@ class Task {
   DateTime? reminder; // optional reminder DateTime
   bool done;
 
+  /// Constructor
   Task({
     required this.id,
     required this.title,
@@ -17,6 +19,7 @@ class Task {
     this.done = false,
   });
 
+  /// Convert Task to/from Map for storage
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -28,6 +31,7 @@ class Task {
     };
   }
 
+  /// Create Task from Map
   factory Task.fromMap(Map<String, dynamic> map) {
     return Task(
       id: map['id'] as int,
@@ -41,6 +45,7 @@ class Task {
     );
   }
 
+  /// Convert Task to/from JSON for easier storage
   String toJson() => json.encode(toMap());
   factory Task.fromJson(String source) => Task.fromMap(json.decode(source));
 }
